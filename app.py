@@ -49,7 +49,7 @@ def main() -> None:
 
         st.markdown("---")
         st.subheader("Add from YouTube (v1)")
-        st.write("Requires ffmpeg, `openai-whisper`, and `yt-dlp` installed.")
+        st.write("Captions-first. If captions are missing, Whisper fallback is used automatically unless disabled via `LC_DISABLE_WHISPER=1`.")
         yt_link = st.text_input("YouTube link", placeholder="https://www.youtube.com/watch?v=...")
         cookies_path = st.text_input("Cookies file (optional)", value="youtube_cookies.txt")
         if st.button("Ingest YouTube Recipe"):
@@ -57,7 +57,13 @@ def main() -> None:
                 st.error("Enter a YouTube link.")
             else:
                 try:
-                    ingest_recipe_from_youtube(index, metadata, model, yt_link.strip(), cookies_path=cookies_path)
+                    ingest_recipe_from_youtube(
+                        index,
+                        metadata,
+                        model,
+                        yt_link.strip(),
+                        cookies_path=cookies_path,
+                    )
                 except Exception as e:
                     st.error(str(e))
                 else:

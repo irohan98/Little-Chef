@@ -10,11 +10,38 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+### FastAPI (no Streamlit)
+```bash
+uvicorn api:app --reload
+```
+
+Example requests:
+```bash
+curl -X POST http://127.0.0.1:8000/ingest/text \\
+  -H \"Content-Type: application/json\" \\
+  -d '{\"text\": \"Title\\n1. Step one...\\n2. Step two...\"}'
+
+curl -X POST http://127.0.0.1:8000/search \\
+  -H \"Content-Type: application/json\" \\
+  -d '{\"query\": \"salmon under 30 minutes\", \"top_k\": 3}'
+```
+
+Open the UI at `http://127.0.0.1:8000/`.
+
+### CLI (no Streamlit)
+```bash
+python cli.py ingest-text --text "Title\n1. Step one...\n2. Step two..."
+python cli.py search "salmon under 30 minutes" --top-k 3
+python cli.py ingest-youtube "https://www.youtube.com/watch?v=..."
+```
+
 ### How it works
 - Paste a recipe in the **Ingest** tab to store it.
 - Use the **Search** tab to find the closest recipe based on your query.
 - (Optional) Set `GOOGLE_API_KEY` to enable the Gemini RAG button.
-- (Optional) YouTube ingestion uses `openai-whisper` + `yt-dlp` and requires `ffmpeg` installed locally.
+- (Optional) YouTube ingestion is captions-first using `youtube-transcript-api`.
+- (Optional) Whisper fallback uses `openai-whisper` + `yt-dlp` and requires `ffmpeg` installed locally.
+- Set `LC_DISABLE_WHISPER=1` to skip the Whisper fallback (avoids potential macOS segfaults).
 
 ### Notebook code reuse
 Core ingestion + FAISS + Gemini RAG logic is extracted into `recipe_ingestion.py` and used by the app.

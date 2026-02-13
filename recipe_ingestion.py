@@ -14,6 +14,13 @@ except Exception:  # pragma: no cover
     genai = None
 
 try:
+    from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
+except Exception:  # pragma: no cover
+    YouTubeTranscriptApi = None
+    TranscriptsDisabled = None
+    NoTranscriptFound = None
+
+try:
     import whisper
 except Exception:  # pragma: no cover
     whisper = None
@@ -55,19 +62,54 @@ def extract_title(text: str) -> str:
     return "Untitled Recipe"
 
 
-# ----- YouTube scraping (v1 from notebook) -----
+# ----- YouTube scraping (v2 from notebook) -----
 
 def is_youtube_link(link: str) -> bool:
     return "youtube.com" in link or "youtu.be" in link
 
 
+def get_video_id(link: str) -> str:
+    from urllib.parse import urlparse, parse_qs
+
+    parsed = urlparse(link)
+    if "youtube.com" in parsed.netloc:
+        return parse_qs(parsed.query).get("v", [""])[0]
+    if "youtu.be" in parsed.netloc:
+        return parsed.path.lstrip("/")
+    return ""
+
+
+def try_youtube_captions(video_id: str) -> str:
+    if YouTubeTranscriptApi is None:
+        raise RuntimeError("youtube-transcript-api is not installed.")
+    try:
+        try:
+            transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        except AttributeError:
+            transcript = YouTubeTranscriptApi().get_transcript(video_id)
+        return " ".join([t["text"] for t in transcript])
+    except (TranscriptsDisabled, NoTranscriptFound):
+        return ""
+    except Exception:
+        return ""
+
+
 def load_whisper_model():
     if whisper is None:
         raise RuntimeError("openai-whisper is not installed.")
-    return whisper.load_model("base")
+    try:
+        import torch
+        torch.set_num_threads(1)
+    except Exception:
+        pass
+    return whisper.load_model("base", device="cpu")
 
 
-def transcribe_youtube(link: str, cookies_path: str = "youtube_cookies.txt") -> str:
+def transcribe_audio_with_yt_dlp(
+    link: str,
+    use_cookies: bool = False,
+    cookies_path: str = "youtube_cookies.txt",
+) -> str:
     if yt_dlp is None:
         raise RuntimeError("yt-dlp is not installed.")
     if whisper is None:
@@ -77,7 +119,6 @@ def transcribe_youtube(link: str, cookies_path: str = "youtube_cookies.txt") -> 
         "format": "bestaudio/best",
         "quiet": False,
         "outtmpl": "/tmp/audio.%(ext)s",
-        "cookiefile": cookies_path,
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
@@ -86,24 +127,62 @@ def transcribe_youtube(link: str, cookies_path: str = "youtube_cookies.txt") -> 
             }
         ],
     }
+    if use_cookies:
+        ydl_opts["cookiefile"] = cookies_path
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([link])
 
-        audio_path = None
-        for fname in os.listdir("/tmp"):
-            if fname.startswith("audio") and fname.endswith(".mp3"):
-                audio_path = os.path.join("/tmp", fname)
-                break
-        if not audio_path:
-            raise FileNotFoundError("Audio file not found after download.")
+        import glob
+
+        audio_files = glob.glob("/tmp/audio*.mp3")
+        if not audio_files:
+            raise FileNotFoundError("No audio file found.")
+        audio_path = audio_files[0]
 
         model = load_whisper_model()
-        result = model.transcribe(audio_path)
+        result = model.transcribe(audio_path, fp16=False)
         return result.get("text", "")
     except Exception:
         return ""
+
+
+def ingest_recipe_smart(
+    link: str,
+    cookies_path: str = "youtube_cookies.txt",
+    use_whisper_fallback: bool = True,
+) -> str:
+    video_id = get_video_id(link)
+    if not video_id:
+        print("❌ Invalid YouTube link.")
+        return ""
+
+    print("🔍 Trying captions...")
+    text = try_youtube_captions(video_id)
+    if text:
+        print("✅ Captions found.")
+        return text
+
+    env_disable = os.environ.get("LC_DISABLE_WHISPER", "").strip().lower() in {"1", "true", "yes"}
+    if not use_whisper_fallback or env_disable:
+        print("⚠️ Captions unavailable. Whisper fallback is disabled.")
+        return ""
+
+    print("🌀 Trying audio transcription without cookies...")
+    text = transcribe_audio_with_yt_dlp(link, use_cookies=False)
+    if text:
+        print("✅ Transcription without cookies succeeded.")
+        return text
+
+    print("🔐 Trying with cookies...")
+    text = transcribe_audio_with_yt_dlp(link, use_cookies=True, cookies_path=cookies_path)
+    if text:
+        print("✅ Transcription with cookies succeeded.")
+        return text
+
+    print("❌ All attempts failed.")
+    return ""
 
 
 def ingest_recipe_from_youtube(
@@ -112,13 +191,19 @@ def ingest_recipe_from_youtube(
     model: SentenceTransformer,
     link: str,
     cookies_path: str = "youtube_cookies.txt",
+    use_whisper_fallback: bool = True,
 ) -> Dict[str, Any]:
     if not is_youtube_link(link):
         raise ValueError("Invalid YouTube URL.")
 
-    text = transcribe_youtube(link, cookies_path)
+    text = ingest_recipe_smart(
+        link,
+        cookies_path=cookies_path,
+        use_whisper_fallback=use_whisper_fallback,
+    )
+
     if not text:
-        raise RuntimeError("Failed to transcribe video.")
+        raise RuntimeError("Failed to get captions or transcribe video.")
 
     return ingest_recipe_from_text(index, metadata, model, text)
 

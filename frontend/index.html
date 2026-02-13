@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Little Chef</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+    <header class="hero">
+      <div class="hero-content">
+        <p class="eyebrow">Recipe memory + retrieval</p>
+        <h1>Little Chef</h1>
+        <p class="subhead">
+          Ingest recipes from text or YouTube, store them in FAISS, and retrieve the closest
+          match to what you want to cook.
+        </p>
+        <div class="hero-actions">
+          <button class="btn primary" data-scroll="ingest">Add a recipe</button>
+          <button class="btn ghost" data-scroll="search">Find a recipe</button>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="card-top">Vector Memory</div>
+        <div class="card-body">
+          <p class="card-title">What should I cook?</p>
+          <p class="card-text">"Salmon under 30 minutes"</p>
+          <div class="card-result">
+            <span>Best match</span>
+            <strong>Easy baked salmon</strong>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section id="stats" class="panel stats-panel">
+        <h2>Recipe Vault</h2>
+        <p class="section-note">Live count of what you've ingested so far.</p>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <span class="stat-label">Recipes stored</span>
+            <strong class="stat-value" id="recipeCount">0</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Vector store</span>
+            <strong class="stat-value">FAISS</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Embedding model</span>
+            <strong class="stat-value">MiniLM-L6</strong>
+          </div>
+        </div>
+      </section>
+
+      <section id="ingest" class="panel">
+        <h2>Ingest</h2>
+        <p class="section-note">Paste a recipe or add one from YouTube.</p>
+        <div class="grid-2">
+          <div class="panel-card">
+            <h3>Text recipe</h3>
+            <textarea id="recipeText" placeholder="Title\n1. Step one...\n2. Step two..."></textarea>
+            <button class="btn primary" id="saveText">Save recipe</button>
+            <div class="status" id="textStatus"></div>
+          </div>
+          <div class="panel-card">
+            <h3>YouTube recipe</h3>
+            <input id="youtubeLink" type="text" placeholder="https://www.youtube.com/watch?v=..." />
+            <input id="cookiesPath" type="text" value="youtube_cookies.txt" />
+            <button class="btn primary" id="saveYoutube">Ingest from YouTube</button>
+            <div class="status" id="ytStatus"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="search" class="panel">
+        <h2>Search</h2>
+        <p class="section-note">Ask for a recipe and get the closest match.</p>
+        <div class="panel-card">
+          <div class="search-row">
+            <input id="query" type="text" placeholder="e.g., salmon under 30 minutes" />
+            <input id="topK" type="number" min="1" max="5" value="3" />
+            <button class="btn primary" id="searchBtn">Search</button>
+          </div>
+          <div class="results" id="results"></div>
+        </div>
+      </section>
+
+      <section id="rag" class="panel">
+        <h2>Gemini RAG</h2>
+        <p class="section-note">Optional: summarize the best recipe with Gemini.</p>
+        <div class="panel-card">
+          <div class="search-row">
+            <input id="ragQuery" type="text" placeholder="Your cooking request" />
+            <input id="ragTopK" type="number" min="1" max="5" value="3" />
+            <input id="ragKey" type="password" placeholder="Gemini API key (optional)" />
+            <button class="btn primary" id="ragBtn">Generate</button>
+          </div>
+          <pre class="rag-output" id="ragOutput"></pre>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Built with FAISS, SentenceTransformers, and Whisper.</p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

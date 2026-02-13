@@ -1,0 +1,278 @@
+:root {
+  color-scheme: light;
+  --ink: #14261b;
+  --muted: #4b5d51;
+  --accent: #ff7a00;
+  --accent-dark: #e86500;
+  --paper: #fdf8f2;
+  --card: #ffffff;
+  --border: #e5ddd3;
+  --shadow: 0 24px 60px rgba(20, 38, 27, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  background: linear-gradient(160deg, #fff4e2 0%, #f9efe4 45%, #f7f2ee 100%);
+  color: var(--ink);
+}
+
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(20, 38, 27, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 36px;
+  padding: 72px min(10vw, 120px) 48px;
+  align-items: center;
+}
+
+.hero h1 {
+  font-family: "Fraunces", serif;
+  font-size: clamp(2.8rem, 4vw, 4rem);
+  margin: 12px 0;
+}
+
+.eyebrow {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.subhead {
+  font-size: 1.1rem;
+  color: var(--muted);
+  max-width: 520px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn {
+  border: none;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn.primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(255, 122, 0, 0.3);
+}
+
+.btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.hero-card {
+  background: var(--card);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  padding: 28px;
+  border: 1px solid var(--border);
+}
+
+.card-top {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin: 16px 0 6px;
+}
+
+.card-text {
+  color: var(--muted);
+}
+
+.card-result {
+  margin-top: 24px;
+  padding: 12px 16px;
+  background: #fff4e2;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.layout {
+  position: relative;
+  z-index: 1;
+  padding: 0 min(10vw, 120px) 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.panel {
+  background: var(--card);
+  border-radius: 26px;
+  padding: 32px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.stats-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: #fff6ea;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.panel h2 {
+  font-family: "Fraunces", serif;
+  margin: 0 0 12px;
+}
+
+.section-note {
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.panel-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  background: #fffdf9;
+}
+
+textarea,
+input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 12px;
+  font-family: inherit;
+  margin: 10px 0 16px;
+  background: #fff;
+}
+
+textarea {
+  min-height: 160px;
+  resize: vertical;
+}
+
+.search-row {
+  display: grid;
+  grid-template-columns: 1.5fr 0.5fr 0.6fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.results {
+  margin-top: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.result-card {
+  padding: 16px;
+  background: #fff4e2;
+  border-radius: 16px;
+  border: 1px solid #f2ddc3;
+}
+
+.result-card h4 {
+  margin: 0 0 8px;
+}
+
+.status {
+  min-height: 20px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.rag-output {
+  background: #11170f;
+  color: #f8f3ea;
+  padding: 16px;
+  border-radius: 14px;
+  min-height: 120px;
+  white-space: pre-wrap;
+}
+
+.footer {
+  text-align: center;
+  padding: 30px 20px 60px;
+  color: var(--muted);
+}
+
+@media (max-width: 980px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .search-row {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
