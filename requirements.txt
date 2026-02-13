@@ -1,0 +1,7 @@
+faiss-cpu
+numpy
+sentence-transformers
+streamlit
+google-generativeai
+openai-whisper
+yt-dlp
