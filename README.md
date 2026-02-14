@@ -4,15 +4,12 @@ A Little-Chef who will keep track of all your recipes from any platform and help
 ## Simple Recipe App (FAISS)
 This repo includes a tiny app to ingest recipes and search them with a FAISS vector store.
 
-### Run locally
+### FastAPI
 ```bash
-pip install -r requirements.txt
-streamlit run app.py
-```
-
-### FastAPI (no Streamlit)
-```bash
-uvicorn api:app --reload
+export OMP_NUM_THREADS=1     
+export MKL_NUM_THREADS=1
+export UVLOOP_NO_EXTENSIONS=1
+uvicorn api:app --reload --loop asyncio
 ```
 
 Example requests:
@@ -37,11 +34,7 @@ python cli.py ingest-youtube "https://www.youtube.com/watch?v=..."
 
 ### How it works
 - Paste a recipe in the **Ingest** tab to store it.
-- Use the **Search** tab to find the closest recipe based on your query.
-- (Optional) Set `GOOGLE_API_KEY` to enable the Gemini RAG button.
-- (Optional) YouTube ingestion is captions-first using `youtube-transcript-api`.
-- (Optional) Whisper fallback uses `openai-whisper` + `yt-dlp` and requires `ffmpeg` installed locally.
-- Set `LC_DISABLE_WHISPER=1` to skip the Whisper fallback (avoids potential macOS segfaults).
+- Set `GOOGLE_API_KEY` to enable the Gemini RAG to retrieve the recipe closest to your prompt from the stored recipies.
 
 ### Notebook code reuse
 Core ingestion + FAISS + Gemini RAG logic is extracted into `recipe_ingestion.py` and used by the app.
