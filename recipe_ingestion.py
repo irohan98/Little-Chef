@@ -357,6 +357,6 @@ def generate_rag_response_with_gemini(
         "Please recommend the best-fitting recipe and explain why it was chosen."
     )
 
-    model_g = genai.GenerativeModel("gemini-pro")
+    model_g = genai.GenerativeModel("gemini-2.5-flash")
     response = model_g.generate_content(prompt)
     return response.text, results
